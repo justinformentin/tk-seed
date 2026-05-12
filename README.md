@@ -21,8 +21,7 @@ Run the CLI directly from source with `npm run cli`:
 npm run cli -- \
   --org_id=xxxxxx \
   --api_public_key=$API_PUBLIC_KEY \
-  --api_private_key=$API_PRIVATE_KEY \
-  --base_url=http://localhost:8081
+  --api_private_key=$API_PRIVATE_KEY
 ```
 
 Or build first and run the compiled output:
