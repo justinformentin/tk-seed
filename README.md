@@ -25,7 +25,7 @@ Flags fall back to env vars:
 | `--org_id` (required) | `ORGANIZATION_ID` | — |
 | `--api_public_key` | `API_PUBLIC_KEY` | — |
 | `--api_private_key` | `API_PRIVATE_KEY` | — |
-| `--base_url` | `BASE_URL` | `https://api.turnkey.com` |
+| `--base_url` | `BASE_URL` | `http://localhost:8081` |
 
 ## Library
 
