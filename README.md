@@ -3,19 +3,33 @@
 Seed a Turnkey organization with sub-orgs, users, wallets, policies, and
 private keys in one shot. Ships as both a CLI and a programmatic library.
 
-## Install
+> Not yet published to npm. Clone this repo and run it locally — instructions below.
+
+## Setup
 
 ```bash
-npm install tk-seed
+git clone <repo-url>
+cd seed-app
+npm install
 ```
 
 ## CLI
 
+Run the CLI directly from source with `npm run cli`:
+
 ```bash
-npx tk-seed --org_id=xxxxxx \
+npm run cli -- \
+  --org_id=xxxxxx \
   --api_public_key=$API_PUBLIC_KEY \
   --api_private_key=$API_PRIVATE_KEY \
   --base_url=http://localhost:8081
+```
+
+Or build first and run the compiled output:
+
+```bash
+npm run build
+node dist/cli.js --org_id=xxxxxx --api_public_key=... --api_private_key=...
 ```
 
 Flags fall back to env vars:
@@ -29,8 +43,10 @@ Flags fall back to env vars:
 
 ## Library
 
+Import `seed()` from the source (or from `dist/` after `npm run build`):
+
 ```ts
-import { seed } from 'tk-seed';
+import { seed } from './src/seed/index.js';
 
 await seed({
   organizationId: 'xxxxx',
@@ -44,28 +60,30 @@ await seed({
 
 ```ts
 {
-  subOrganizations: 2,
-  users: 3,
-  wallets: 5,
-  policies: 3,
-  privateKeys: 3,
+  subOrganizations: 12,
+  userTags: 41,
+  users: 27,
+  wallets: 29,
+  policies: 27,
+  privateKeyTags: 27,
+  privateKeys: 27,
 }
 ```
 
-Counts are fixed for v0.1 (see `DEFAULT_COUNTS` in `src/seed/index.ts`). The
+Counts are fixed for v0.1 (see `DEFAULT_COUNTS` in [src/seed/index.ts](src/seed/index.ts)). The
 next iteration will accept per-resource overrides.
+
+## Scripts
+
+```bash
+npm run cli -- --help  # run the CLI from source via tsx
+npm run build          # tsc → ./dist
+npm run typecheck
+```
 
 ## Roadmap
 
+- [ ] Publish to npm so `npx tk-seed` works.
 - [ ] Count overrides on `seed()` (`{ subOrganizations: 100, wallets: 500, ... }`).
 - [ ] User tags and private-key tags.
 - [ ] Parent-org users and parent-org wallets.
-
-## Development
-
-```bash
-npm install
-npm run build          # tsc → ./dist
-npm run cli -- --help  # run the CLI from source via tsx
-npm run typecheck
-```
