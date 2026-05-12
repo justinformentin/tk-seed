@@ -46,12 +46,18 @@ export const DEFAULT_SUB_ORG_COUNTS: OrgCounts = {
 export const DEFAULT_SUB_ORG_COUNT = 12;
 
 export interface SeedOptions extends ApiConfig {
-  logger?: Logger;
   /**
-   * Progress reporter. If provided, `start`/`tick`/`stop` are called as resources
-   * are created. The CLI wires this up to a cli-progress bar.
+   * Per-resource logger. Defaults to `consoleLogger` when no progress reporter
+   * is active and to silent when one is. Pass `false` to silence regardless.
    */
-  progress?: ProgressReporter;
+  logger?: Logger | false;
+  /**
+   * Progress reporter. Defaults to `false` (no bar). Pass a `ProgressReporter`
+   * (e.g. `createCliProgress()`) to enable one — the CLI does this. When a
+   * reporter is active the default logger goes silent so log lines don't
+   * interleave with the bar.
+   */
+  progress?: ProgressReporter | false;
   /** Number of sub-orgs to create off the parent. Each one is seeded with `subOrgCounts`. */
   subOrgCount?: number;
   /** Resource counts applied to the parent org. */
@@ -135,10 +141,17 @@ export async function seed(opts: SeedOptions): Promise<SeedSummary> {
     apiPrivateKey: opts.apiPrivateKey,
     baseUrl: opts.baseUrl,
   };
-  const progress = opts.progress ?? silentProgress;
-  // When a progress reporter is provided, silence per-resource log lines so they
-  // don't interleave with the bar; programmatic users without progress still get logs.
-  const logger = opts.logger ?? (opts.progress ? silentLogger : consoleLogger);
+  // Progress defaults to off. Pass a reporter (e.g. `createCliProgress()`) to enable.
+  const progressActive = opts.progress !== false && opts.progress != null;
+  const progress: ProgressReporter = progressActive
+    ? (opts.progress as ProgressReporter)
+    : silentProgress;
+  // Logger silences while a progress reporter is active so per-resource lines
+  // don't interleave with the bar. `logger: false` silences regardless.
+  const logger: Logger =
+    opts.logger === false
+      ? silentLogger
+      : (opts.logger ?? (progressActive ? silentLogger : consoleLogger));
   const parentCounts: OrgCounts = { ...DEFAULT_PARENT_COUNTS, ...opts.parentCounts };
   const subOrgCounts: OrgCounts = { ...DEFAULT_SUB_ORG_COUNTS, ...opts.subOrgCounts };
   const subOrgCount = opts.subOrgCount ?? DEFAULT_SUB_ORG_COUNT;

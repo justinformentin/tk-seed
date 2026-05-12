@@ -39,6 +39,7 @@ Flags fall back to env vars:
 | `--api_public_key` | `API_PUBLIC_KEY` | — |
 | `--api_private_key` | `API_PRIVATE_KEY` | — |
 | `--base_url` | `BASE_URL` | `http://localhost:8081` |
+| `--sub_orgs` | — | `12` |
 
 ## Library
 
@@ -69,8 +70,46 @@ await seed({
 }
 ```
 
-Counts are fixed for v0.1 (see `DEFAULT_COUNTS` in [src/seed/index.ts](src/seed/index.ts)). The
-next iteration will accept per-resource overrides.
+### Options
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `organizationId` | `string` | — | Parent organization id. |
+| `apiPublicKey` | `string` | — | Turnkey API public key. |
+| `apiPrivateKey` | `string` | — | Turnkey API private key. |
+| `baseUrl` | `string` | `http://localhost:8081` | Turnkey API base URL. |
+| `subOrgCount` | `number` | `12` | Number of sub-orgs to create off the parent. Set to `0` to seed only the parent. |
+| `parentCounts` | `Partial<OrgCounts>` | see [src/seed/index.ts](src/seed/index.ts) | Per-resource counts for the parent org. |
+| `subOrgCounts` | `Partial<OrgCounts>` | see [src/seed/index.ts](src/seed/index.ts) | Per-resource counts applied inside each sub-org. |
+| `progress` | `ProgressReporter \| false` | `false` (no bar) | Pass a reporter (e.g. `createCliProgress()`) to enable a bar. The CLI does this. |
+| `logger` | `Logger \| false` | `consoleLogger` by default; silent when a `progress` reporter is active; pass `false` to silence regardless | Receives `info`/`warn`/`error` per resource. |
+
+Output combinations:
+
+| `progress` | `logger` | Result |
+| --- | --- | --- |
+| default (`false`) | default | No bar, per-resource lines via `console`. |
+| reporter | default | Progress bar, no per-resource log lines. |
+| reporter | `false` | Progress bar only. |
+| default (`false`) | `false` | Silent. |
+
+`OrgCounts` fields: `userTags`, `users`, `wallets`, `accountsPerWallet`, `privateKeyTags`, `privateKeys`, `policies`.
+
+Example with overrides:
+
+```ts
+import { seed } from './src/seed/index.js';
+
+await seed({
+  organizationId: 'xxxxx',
+  apiPublicKey: '...',
+  apiPrivateKey: '...',
+  // optional
+  subOrgCount: 50,
+  parentCounts: { users: 10, wallets: 20 },
+  subOrgCounts: { users: 2, wallets: 1 },
+});
+```
 
 ## Scripts
 
@@ -84,5 +123,3 @@ npm run typecheck
 
 - [ ] Publish to npm so `npx tk-seed` works.
 - [ ] Count overrides on `seed()` (`{ subOrganizations: 100, wallets: 500, ... }`).
-- [ ] User tags and private-key tags.
-- [ ] Parent-org users and parent-org wallets.

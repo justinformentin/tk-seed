@@ -13,6 +13,8 @@ program
   .option('--api_private_key <key>', 'Turnkey API private key (env API_PRIVATE_KEY)')
   .option('--base_url <url>', 'Turnkey API base URL (env BASE_URL)', 'http://localhost:8081')
   .option('--sub_orgs <n>', 'Number of sub-organizations to create + seed', (v) => parseInt(v, 10))
+  .option('--no-progress', 'Disable the progress bar')
+  .option('--no-logger', 'Silence per-resource log lines')
   .action(async (opts) => {
     const apiPublicKey = opts.api_public_key ?? process.env.API_PUBLIC_KEY;
     const apiPrivateKey = opts.api_private_key ?? process.env.API_PRIVATE_KEY;
@@ -22,14 +24,14 @@ program
       );
     }
 
-    const progress = createCliProgress();
     const summary = await seed({
       organizationId: opts.org_id,
       apiPublicKey,
       apiPrivateKey,
       baseUrl: opts.base_url ?? process.env.BASE_URL ?? 'http://localhost:8081',
       subOrgCount: opts.sub_orgs,
-      progress,
+      progress: opts.progress ? createCliProgress() : false,
+      logger: opts.logger ? undefined : false,
     });
     console.log(`\nDone. ${JSON.stringify(summary)}`);
   });
